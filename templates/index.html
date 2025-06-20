@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Объявления{% endblock %}
+
+{% block content %}
+<h1>Личный кабинет</h1>
+
+<div id="listings-block">
+  <div class="listings-header">
+    <h2>Объявления</h2>
+    <div class="search-actions">
+      <div class="search-container">
+        <input type="text" id="search-title" placeholder="Поиск по названию...">
+        <div class="filter-dropdown" id="filter-dropdown" style="display: none;">
+          <form id="filter-form">
+            <input type="text" name="city" placeholder="Город">
+            <input type="number" name="price_min" placeholder="Цена от">
+            <input type="number" name="price_max" placeholder="Цена до">
+            <select name="status">
+              <option value="">Статус</option>
+              <option value="активен">Активен</option>
+              <option value="скрыт">Скрыт</option>
+              <option value="продано">Продано</option>
+            </select>
+            <select name="type" id="filter-type">
+              <option value="">Тип</option>
+              <option value="квартира">Квартира</option>
+              <option value="дом">Дом</option>
+            </select>
+            <div id="apartment-filter-fields" style="display: none;">
+              <input type="number" name="area_min_apartment" placeholder="Площадь от (м²)">
+              <input type="number" name="area_max_apartment" placeholder="Площадь до (м²)">
+              <input type="number" name="filter_rooms" placeholder="Количество комнат">
+              <input type="number" name="filter_floor" placeholder="Этаж">
+            </div>
+            <div id="house-filter-fields" style="display: none;">
+              <input type="number" name="filter_floors" placeholder="Этажей">
+              <input type="number" name="area_min_house" placeholder="Площадь от (м²)">
+              <input type="number" name="area_max_house" placeholder="Площадь до (м²)">
+              <input type="number" name="plot_min" placeholder="Участок от (сотки)">
+              <input type="number" name="plot_max" placeholder="Участок до (сотки)">
+            </div>
+            <div class="filter-buttons">
+              <button type="submit" class="btn btn-primary">Найти</button>
+              <button type="button" id="reset-filters" class="btn">Сбросить</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <button id="open-modal" class="btn btn-success">Создать</button>
+    </div>
+  </div>
+
+  <section class="listings-wrapper">
+    <div class="empty-message" id="empty-message" style="display: none;">
+      <div class="empty-title">Создайте объявление</div>
+      <div class="empty-subtext">Здесь будет список объявлений, которые вы опубликуете</div>
+    </div>
+    <div id="listings"></div>
+  </section>
+</div>
+
+<!-- Модалка добавления -->
+<div id="modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2>Добавить объявление</h2>
+    <form id="add-form">
+      <input type="text" name="title" placeholder="Название" required><br>
+      <select name="type" id="property-type" required>
+        <option value="">Тип недвижимости</option>
+        <option value="квартира">Квартира</option>
+        <option value="дом">Дом</option>
+      </select><br>
+      <input type="text" name="city" placeholder="Город" required><br>
+      <input type="text" name="address" placeholder="Улица" required><br>
+      <input type="number" name="price" placeholder="Цена" required><br>
+      <textarea name="description" placeholder="Описание"></textarea><br>
+
+      <div id="apartment-fields" style="display:none;">
+        <input type="number" name="area" placeholder="Площадь (м²)" required><br>
+        <input type="number" name="rooms" placeholder="Количество комнат" required><br>
+        <input type="number" name="floor" placeholder="Этаж" required><br>
+      </div>
+
+      <div id="house-fields" style="display:none;">
+        <input type="number" name="area_house" placeholder="Площадь дома (м²)" required><br>
+        <input type="number" name="floors" placeholder="Этажей" required><br>
+        <input type="number" name="plot_size" placeholder="Площадь участка (сотки)" required><br>
+      </div>
+
+      <select name="status" required>
+        <option value="">Статус</option>
+        <option value="активен">Активен</option>
+        <option value="скрыт">Скрыт</option>
+        <option value="продано">Продано</option>
+      </select><br>
+      <div class="form-error" id="add-form-error" style="color: red; margin-bottom: 10px;"></div>
+      <button type="submit" class="btn btn-primary">Добавить</button>
+      <button type="button" id="close-modal" class="btn">Отмена</button>
+    </form>
+  </div>
+</div>
+
+<!-- Модалка редактирования -->
+<div id="edit-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2>Редактировать объявление</h2>
+    <form id="edit-form">
+      <input type="text" name="title" required><br>
+      <select name="type" id="edit-property-type" required>
+        <option value="">Тип недвижимости</option>
+        <option value="квартира">Квартира</option>
+        <option value="дом">Дом</option>
+      </select><br>
+      <input type="text" name="city" required><br>
+      <input type="text" name="address" placeholder="Улица" required><br>
+      <input type="number" name="price" required><br>
+      <textarea name="description"></textarea><br>
+
+      <div id="apartment-edit-fields" style="display:none;">
+        <input type="number" name="area" placeholder="Площадь (м²)"><br>
+        <input type="number" name="rooms" placeholder="Количество комнат"><br>
+        <input type="number" name="floor" placeholder="Этаж"><br>
+      </div>
+
+      <div id="house-edit-fields" style="display:none;">
+        <input type="number" name="area_house" placeholder="Площадь дома (м²)"><br>
+        <input type="number" name="floors" placeholder="Этажей"><br>
+        <input type="number" name="plot_size" placeholder="Площадь участка (сотки)"><br>
+      </div>
+
+      <select name="status" required>
+        <option value="активен">Активен</option>
+        <option value="скрыт">Скрыт</option>
+        <option value="продано">Продано</option>
+      </select><br>
+      <div class="form-error" id="edit-form-error" style="color: red; margin-bottom: 10px;"></div>
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+      <button type="button" id="cancel-edit" class="btn">Отмена</button>
+    </form>
+  </div>
+</div>
+
+<!-- Модалка подтверждения удаления -->
+<div id="confirm-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h2>Удаление</h2>
+    <p>Вы уверены, что хотите удалить объявление?</p>
+    <div style="text-align: right; margin-top: 20px;">
+      <button id="confirm-delete" class="btn btn-danger">Удалить</button>
+      <button id="cancel-delete" class="btn">Отмена</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="/static/main.js"></script>
+{% endblock %}

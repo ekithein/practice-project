@@ -1,0 +1,12 @@
+# Пайтон
+__pycache__/
+*.pyc
+
+# Env файлы
+*.env
+
+# Бд
+*.db
+
+# Flask
+instance/

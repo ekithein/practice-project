@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Аналитика{% endblock %}
+
+{% block content %}
+<h1>Личный кабинет</h1>
+
+<!-- 👇 HERO-ПАНЕЛЬ -->
+<div class="stats-hero">
+  <div class="stat-block">
+    <div class="stat-title"><i class="fas fa-file-alt icon"></i> Объявлений</div>
+    <div class="stat-value" id="stat-total">...</div>
+  </div>
+  <div class="stat-block">
+    <div class="stat-title"><i class="fas fa-coins icon"></i> Средняя цена</div>
+    <div class="stat-value" id="stat-average">...</div>
+  </div>
+  <div class="stat-block">
+    <div class="stat-title"><i class="fas fa-city icon"></i> Топ города</div>
+    <div class="stat-value" id="stat-top">...</div>
+  </div>
+</div>
+
+<!-- 👇 ГРАФИКИ -->
+<div class="analytics-graphs">
+  <!-- Статусы -->
+  <div class="chart-card">
+    <h3>Объявления по статусам</h3>
+    <div class="chart-container">
+      <canvas id="statusChart" data-chart-type="bar"></canvas>
+      <div class="no-data" id="statusChart-empty">Нет данных</div>
+    </div>
+  </div>
+
+  <!-- Города -->
+  <div class="chart-card">
+    <h3>Топ города</h3>
+    <div class="chart-container">
+      <canvas id="cityChart" data-chart-type="bar"></canvas>
+      <div class="no-data" id="cityChart-empty">Нет данных</div>
+    </div>
+  </div>
+
+  <!-- Пончик продаж -->
+  <div class="chart-card">
+    <h3>Обзор продаж</h3>
+    <div class="chart-container donut-with-center">
+      <canvas id="priceStatusChart" data-chart-type="doughnut"></canvas>
+      <div class="no-data" id="priceStatusChart-empty">Нет данных</div>
+    </div>
+  </div>
+
+  <!-- Гистограмма цен -->
+  <div class="chart-card">
+    <h3>Распределение цен</h3>
+    <div class="chart-container">
+      <canvas id="priceDistributionChart" data-chart-type="histogram"></canvas>
+      <div class="no-data" id="priceDistributionChart-empty">Нет данных</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="module" src="/static/analytics.js"></script>
+  <script type="module" src="/static/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
