@@ -1,16 +1,16 @@
-// handlers.js — логика создания, редактирования, удаления
+// логика создания, редактирования, удаления
+
 import { loadListings } from './ui.js';
 import { API_BASE, getText } from './utils.js';
 
 console.log("handlers.js загружен");
-
 
 let currentEditId = null;
 
 export function bindCreateForm() {
     const form = document.getElementById("add-form");
     const modal = document.getElementById("modal");
-    const errorBlock = document.getElementById("add-form-error"); 
+    const errorBlock = document.getElementById("add-form-error");
 
     if (!form || !modal || !errorBlock) return;
 
@@ -19,7 +19,7 @@ export function bindCreateForm() {
         const type = form.type.value;
         const formData = extractFormData(form, type);
 
-        errorBlock.textContent = ""; // Сброс ошибки
+        errorBlock.textContent = "";
 
         try {
             const response = await fetch(API_BASE, {
@@ -33,7 +33,6 @@ export function bindCreateForm() {
             if (response.status === 401) return (window.location.href = "/");
 
             if (!response.ok) {
-                // Показываем ошибку от сервера
                 errorBlock.textContent = result.error || "Ошибка при добавлении";
                 return;
             }
@@ -75,7 +74,6 @@ export function bindEditForm() {
         const aptFields = document.getElementById("apartment-edit-fields");
         const houseFields = document.getElementById("house-edit-fields");
 
-        // Показываем поля и required
         const toggleRequired = (container, required) => {
             Array.from(container.querySelectorAll("input")).forEach(inp => {
                 required ? inp.setAttribute("required", "required") : inp.removeAttribute("required");
@@ -87,18 +85,29 @@ export function bindEditForm() {
             houseFields.style.display = "none";
             toggleRequired(aptFields, true);
             toggleRequired(houseFields, false);
-            form.area.value = getText(card, "Площадь");
+
+            if (form.area) {
+                form.area.value = getText(card, "Площадь");
+            }
+
             form.rooms.value = getText(card, "Комнат");
             form.floor.value = getText(card, "Этаж");
+
         } else if (type === "дом") {
             aptFields.style.display = "none";
             houseFields.style.display = "block";
             toggleRequired(aptFields, false);
             toggleRequired(houseFields, true);
-            form.area_house.value = getText(card, "Площадь");
+
+            if (form.area) {
+                form.area.value = getText(card, "Площадь");
+            }
+
+
             form.floors.value = getText(card, "Этажей");
             form.plot_size.value = getText(card, "Участок");
-        } else {
+        }
+        else {
             aptFields.style.display = "none";
             houseFields.style.display = "none";
             toggleRequired(aptFields, false);
@@ -171,17 +180,19 @@ function extractFormData(form, type) {
         price: parseInt(form.price.value),
         description: form.description.value,
         status: form.status.value,
-        address: form.address.value
+        address: form.address.value,
+        area: parseInt(form.area?.value) || null
     };
+
     if (type === "квартира") {
-        data.area = parseInt(form.area?.value) || null;
         data.rooms = parseInt(form.rooms?.value) || null;
         data.floor = parseInt(form.floor?.value) || null;
     }
+
     if (type === "дом") {
-        data.area = parseInt(form.area_house?.value) || null;
         data.floors = parseInt(form.floors?.value) || null;
         data.plot_size = parseInt(form.plot_size?.value) || null;
     }
+
     return data;
 }

@@ -28,15 +28,15 @@
               <option value="дом">Дом</option>
             </select>
             <div id="apartment-filter-fields" style="display: none;">
-              <input type="number" name="area_min_apartment" placeholder="Площадь от (м²)">
-              <input type="number" name="area_max_apartment" placeholder="Площадь до (м²)">
+              <input type="number" name="area_min" placeholder="Площадь от (м²)">
+              <input type="number" name="area_max" placeholder="Площадь до (м²)">
               <input type="number" name="filter_rooms" placeholder="Количество комнат">
               <input type="number" name="filter_floor" placeholder="Этаж">
             </div>
             <div id="house-filter-fields" style="display: none;">
+              <input type="number" name="area_min" placeholder="Площадь от (м²)">
+              <input type="number" name="area_max" placeholder="Площадь до (м²)">
               <input type="number" name="filter_floors" placeholder="Этажей">
-              <input type="number" name="area_min_house" placeholder="Площадь от (м²)">
-              <input type="number" name="area_max_house" placeholder="Площадь до (м²)">
               <input type="number" name="plot_min" placeholder="Участок от (сотки)">
               <input type="number" name="plot_max" placeholder="Участок до (сотки)">
             </div>
@@ -74,16 +74,15 @@
       <input type="text" name="city" placeholder="Город" required><br>
       <input type="text" name="address" placeholder="Улица" required><br>
       <input type="number" name="price" placeholder="Цена" required><br>
+      <input type="number" name="area" placeholder="Площадь (м²)" required><br>
       <textarea name="description" placeholder="Описание"></textarea><br>
 
       <div id="apartment-fields" style="display:none;">
-        <input type="number" name="area" placeholder="Площадь (м²)" required><br>
         <input type="number" name="rooms" placeholder="Количество комнат" required><br>
         <input type="number" name="floor" placeholder="Этаж" required><br>
       </div>
 
       <div id="house-fields" style="display:none;">
-        <input type="number" name="area_house" placeholder="Площадь дома (м²)" required><br>
         <input type="number" name="floors" placeholder="Этажей" required><br>
         <input type="number" name="plot_size" placeholder="Площадь участка (сотки)" required><br>
       </div>
@@ -115,16 +114,15 @@
       <input type="text" name="city" required><br>
       <input type="text" name="address" placeholder="Улица" required><br>
       <input type="number" name="price" required><br>
+      <input type="number" name="area" placeholder="Площадь (м²)" required><br>
       <textarea name="description"></textarea><br>
 
       <div id="apartment-edit-fields" style="display:none;">
-        <input type="number" name="area" placeholder="Площадь (м²)"><br>
         <input type="number" name="rooms" placeholder="Количество комнат"><br>
         <input type="number" name="floor" placeholder="Этаж"><br>
       </div>
 
       <div id="house-edit-fields" style="display:none;">
-        <input type="number" name="area_house" placeholder="Площадь дома (м²)"><br>
         <input type="number" name="floors" placeholder="Этажей"><br>
         <input type="number" name="plot_size" placeholder="Площадь участка (сотки)"><br>
       </div>

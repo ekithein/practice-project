@@ -1,4 +1,4 @@
-// utils.js — вспомогательные функции
+// вспомогательные функции
 
 export const API_BASE = "/api/listings";
 
@@ -8,5 +8,11 @@ export function formatPrice(value) {
 
 export function getText(card, label) {
     const p = Array.from(card.querySelectorAll("p")).find(el => el.innerText.startsWith(label));
-    return p ? p.innerText.replace(`${label}: `, "").replace(" м²", "").replace(" ₽", "").replace(" сот.", "") : "";
+    return p
+        ? p.innerText
+            .replace(`${label}: `, "")
+            .replace(" м²", "")
+            .replace(" ₽", "")
+            .replace(" сот.", "")
+        : "";
 }

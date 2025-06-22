@@ -1,12 +1,11 @@
-from flask import Blueprint,  jsonify, send_file
+from flask import Blueprint, jsonify, send_file
 from db import get_db_connection
-from utils.helpers import get_current_user, validate_fields, save_listing_details, delete_listing_details
+from utils.helpers import get_current_user
 import pandas as pd
 import io
 
 analytics_bp = Blueprint("analytics", __name__)
 
-# ===== АНАЛИТИКА =====
 @analytics_bp.route("/api/analytics")
 def analytics():
     user_id, _ = get_current_user()
@@ -31,17 +30,30 @@ def analytics():
         price_summary = dict(cur.fetchall())
 
         cur.execute("""
-            SELECT range_label, COUNT(*) FROM (
-                SELECT CASE
-                    WHEN price BETWEEN 1000000 AND 4999999 THEN '1–5 млн ₽'
-                    WHEN price BETWEEN 5000000 AND 9999999 THEN '5–10 млн ₽'
-                    WHEN price BETWEEN 10000000 AND 14999999 THEN '10–15 млн ₽'
-                    WHEN price BETWEEN 15000000 AND 19999999 THEN '15–20 млн ₽'
-                    WHEN price BETWEEN 20000000 AND 29999999 THEN '20–30 млн ₽'
-                    ELSE 'другое'
-                END AS range_label FROM listings WHERE user_id = %s
-            ) sub GROUP BY range_label
+    SELECT range_label, COUNT(*) FROM (
+        SELECT
+            CASE
+                WHEN price BETWEEN 1000000 AND 4999999 THEN '1–5 млн ₽'
+                WHEN price BETWEEN 5000000 AND 9999999 THEN '5–10 млн ₽'
+                WHEN price BETWEEN 10000000 AND 14999999 THEN '10–15 млн ₽'
+                WHEN price BETWEEN 15000000 AND 19999999 THEN '15–20 млн ₽'
+                WHEN price BETWEEN 20000000 AND 29999999 THEN '20–30 млн ₽'
+                ELSE 'другое'
+            END AS range_label,
+            CASE
+                WHEN price BETWEEN 1000000 AND 4999999 THEN 1
+                WHEN price BETWEEN 5000000 AND 9999999 THEN 2
+                WHEN price BETWEEN 10000000 AND 14999999 THEN 3
+                WHEN price BETWEEN 15000000 AND 19999999 THEN 4
+                WHEN price BETWEEN 20000000 AND 29999999 THEN 5
+                ELSE 6
+            END AS sort_order
+        FROM listings
+        WHERE user_id = %s) sub
+        GROUP BY range_label, sort_order
+        ORDER BY sort_order
         """, (user_id,))
+
         price_ranges = [{"label": label, "count": count} for label, count in cur.fetchall()]
 
         total_price = sum(price_summary.values())
@@ -69,9 +81,9 @@ def export_excel():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT l.title, l.type, l.city, l.address, l.price, l.status, l.description, l.created_at,
-               a.area, a.rooms, a.floor,
-               h.area, h.floors, h.plot_size
+        SELECT l.title, l.type, l.city, l.address, l.price, l.status, l.description, l.created_at, l.area,
+               a.rooms, a.floor,
+               h.floors, h.plot_size
         FROM listings l
         LEFT JOIN apartment_details a ON l.id = a.listing_id
         LEFT JOIN house_details h ON l.id = h.listing_id
@@ -82,9 +94,9 @@ def export_excel():
     data = []
     for row in cur.fetchall():
         (
-            title, type_, city, address, price, status, desc, created_at,
-            apt_area, apt_rooms, apt_floor,
-            house_area, house_floors, plot_size
+            title, type_, city, address, price, status, desc, created_at, area,
+            apt_rooms, apt_floor,
+            house_floors, plot_size
         ) = row
 
         base = {
@@ -93,6 +105,7 @@ def export_excel():
             "Город": city,
             "Адрес": address,
             "Цена": price,
+            "Площадь (м²)": area,
             "Статус": status,
             "Описание": desc,
             "Дата": created_at.strftime("%Y-%m-%d %H:%M")
@@ -100,7 +113,6 @@ def export_excel():
 
         if type_ == "квартира":
             base.update({
-                "Площадь (м²)": apt_area,
                 "Комнат": apt_rooms,
                 "Этаж": apt_floor,
                 "Этажей": "",
@@ -108,7 +120,6 @@ def export_excel():
             })
         elif type_ == "дом":
             base.update({
-                "Площадь (м²)": house_area,
                 "Комнат": "",
                 "Этаж": "",
                 "Этажей": house_floors,
@@ -116,7 +127,6 @@ def export_excel():
             })
         else:
             base.update({
-                "Площадь (м²)": "",
                 "Комнат": "",
                 "Этаж": "",
                 "Этажей": "",
@@ -140,4 +150,3 @@ def export_excel():
         as_attachment=True,
         download_name="listings.xlsx"
     )
-

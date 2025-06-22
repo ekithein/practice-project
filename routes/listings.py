@@ -18,7 +18,9 @@ def get_listings():
     args = request.args
 
     def append_filter(condition, value):
-        if value: filters.append(condition); params.append(value)
+        if value:
+            filters.append(condition)
+            params.append(value)
 
     # Общие фильтры
     append_filter("LOWER(l.title) LIKE %s", f"%{args.get('title', '').lower()}%" if args.get("title") else None)
@@ -27,28 +29,20 @@ def get_listings():
     append_filter("l.type = %s", args.get("type"))
     append_filter("l.price >= %s", args.get("price_min"))
     append_filter("l.price <= %s", args.get("price_max"))
+    append_filter("l.area >= %s", args.get("area_min"))
+    append_filter("l.area <= %s", args.get("area_max"))
 
-    # Фильтры по типу
-    apt = lambda f: f"(l.type != 'квартира' OR a.{f} %s)"
-    dom = lambda f: f"(l.type != 'дом' OR h.{f} %s)"
-
-    for key, cond in {
-        "area_min_apartment": apt("area >= "),
-        "area_max_apartment": apt("area <= "),
-        "filter_rooms": apt("rooms = "),
-        "filter_floor": apt("floor = "),
-        "area_min_house": dom("area >= "),
-        "area_max_house": dom("area <= "),
-        "filter_floors": dom("floors = "),
-        "plot_min": dom("plot_size >= "),
-        "plot_max": dom("plot_size <= "),
-    }.items():
-        append_filter(cond, args.get(key))
+    # Специфические фильтры
+    append_filter("(l.type != 'квартира' OR a.rooms = %s)", args.get("filter_rooms"))
+    append_filter("(l.type != 'квартира' OR a.floor = %s)", args.get("filter_floor"))
+    append_filter("(l.type != 'дом' OR h.floors = %s)", args.get("filter_floors"))
+    append_filter("(l.type != 'дом' OR h.plot_size >= %s)", args.get("plot_min"))
+    append_filter("(l.type != 'дом' OR h.plot_size <= %s)", args.get("plot_max"))
 
     cur.execute(f"""
-        SELECT l.id, l.title, l.type, l.city, l.price, l.status, l.description, l.address, l.created_at,
-               a.area, a.rooms, a.floor,
-               h.area, h.floors, h.plot_size
+        SELECT l.id, l.title, l.type, l.city, l.price, l.status, l.description, l.address, l.created_at, l.area,
+               a.rooms, a.floor,
+               h.floors, h.plot_size
         FROM listings l
         LEFT JOIN apartment_details a ON l.id = a.listing_id
         LEFT JOIN house_details h ON l.id = h.listing_id
@@ -59,21 +53,22 @@ def get_listings():
     listings = []
     for row in cur.fetchall():
         (
-            id, title, type_, city, price, status, desc, address, created_at,
-            apt_area, apt_rooms, apt_floor,
-            house_area, house_floors, plot_size
+            id, title, type_, city, price, status, desc, address, created_at, area,
+            apt_rooms, apt_floor,
+            house_floors, plot_size
         ) = row
 
         listing = {
             "id": id, "title": title, "type": type_, "city": city,
             "price": price, "status": status, "description": desc,
-            "address": address, "created_at": created_at.strftime("%Y-%m-%d %H:%M")
+            "address": address, "created_at": created_at.strftime("%Y-%m-%d %H:%M"),
+            "area": area
         }
 
         if type_ == "квартира":
-            listing.update({"area": apt_area, "rooms": apt_rooms, "floor": apt_floor})
+            listing.update({"rooms": apt_rooms, "floor": apt_floor})
         elif type_ == "дом":
-            listing.update({"area": house_area, "floors": house_floors, "plot_size": plot_size})
+            listing.update({"floors": house_floors, "plot_size": plot_size})
 
         listings.append(listing)
 
@@ -88,7 +83,6 @@ def create_listing():
         return jsonify({"error": "Не авторизован"}), 401
 
     data = request.get_json()
-
     error = validate_listing_data(data)
     if error:
         return jsonify({"error": error}), 400
@@ -96,10 +90,10 @@ def create_listing():
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute("""INSERT INTO listings (user_id, title, type, city, price, description, status, address)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+        cur.execute("""INSERT INTO listings (user_id, title, type, city, price, description, status, address, area)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
                     (user_id, data["title"], data["type"], data["city"],
-                     data["price"], data.get("description"), data.get("status"), data["address"]))
+                     data["price"], data.get("description"), data.get("status"), data["address"], data["area"]))
         listing_id = cur.fetchone()[0]
         save_listing_details(cur, listing_id, data["type"], data)
         conn.commit()
@@ -126,10 +120,10 @@ def update_listing(listing_id):
     cur = conn.cursor()
     try:
         cur.execute("""UPDATE listings SET title = %s, type = %s, city = %s, price = %s,
-                       description = %s, status = %s, address = %s
+                       description = %s, status = %s, address = %s, area = %s
                        WHERE id = %s AND user_id = %s""",
                     (data["title"], data["type"], data["city"], data["price"],
-                     data.get("description"), data.get("status"), data["address"],
+                     data.get("description"), data.get("status"), data["address"], data["area"],
                      listing_id, user_id))
 
         delete_listing_details(cur, listing_id)

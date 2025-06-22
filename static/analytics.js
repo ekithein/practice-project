@@ -1,4 +1,5 @@
-// analytics.js — визуализация аналитики
+// визуализация аналитики
+
 import { formatPrice } from './utils.js';
 
 const COLORS = {
@@ -6,7 +7,6 @@ const COLORS = {
   accent:    "#6b7280", // графитовый
   neutral:   "#e5e7eb"  // светло-серый
 };
-
 
 document.addEventListener("DOMContentLoaded", () => {
   fetch("/api/analytics")

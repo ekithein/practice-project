@@ -1,3 +1,5 @@
+// основное
+
 import { loadListings, initFilterForm, bindModals } from './ui.js';
 import { bindCreateForm, bindEditForm, bindDeleteButtons } from './handlers.js';
 

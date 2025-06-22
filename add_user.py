@@ -1,9 +1,12 @@
+# Скрипт для добавления пользователя
+
 from getpass import getpass
 from werkzeug.security import generate_password_hash
 from db import get_db_connection
+from dotenv import load_dotenv
 
 
-# Скрипт для добавления пользователя
+load_dotenv(".env")
 def main():
     print("Добавление нового пользователя")
     username = input("Логин: ").strip()

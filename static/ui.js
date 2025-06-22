@@ -1,4 +1,4 @@
-// ui.js — отрисовка и управление интерфейсом
+// отрисовка и управление интерфейсом
 import { API_BASE } from "./utils.js";
 console.log("ui.js загружен");
 
@@ -58,23 +58,26 @@ export function renderListingCard(listing) {
 
 function renderExtra(listing) {
   let out = "";
+  if (listing.area)
+    out += `<p><strong>Площадь:</strong> ${listing.area} м²</p>`;
+
   if (listing.type === "квартира") {
-    if (listing.area)
-      out += `<p><strong>Площадь:</strong> ${listing.area} м²</p>`;
     if (listing.rooms)
       out += `<p><strong>Комнат:</strong> ${listing.rooms}</p>`;
-    if (listing.floor) out += `<p><strong>Этаж:</strong> ${listing.floor}</p>`;
+    if (listing.floor)
+      out += `<p><strong>Этаж:</strong> ${listing.floor}</p>`;
   }
+
   if (listing.type === "дом") {
-    if (listing.area)
-      out += `<p><strong>Площадь:</strong> ${listing.area} м²</p>`;
     if (listing.floors)
       out += `<p><strong>Этажей:</strong> ${listing.floors}</p>`;
     if (listing.plot_size)
       out += `<p><strong>Участок:</strong> ${listing.plot_size} сот.</p>`;
   }
+
   return out;
 }
+
 
 export function bindModals() {
   const openBtn = document.getElementById("open-modal");
