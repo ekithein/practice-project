@@ -27,8 +27,15 @@ cd practice-project
 ### 2. Создание и активация виртуального окружения
 ```bash
 python -m venv venv
-source venv\Scripts\activate #на Windows
+.\venv\Scripts\Activate.ps1
 ```
+Если не сработало, попробуйте:
+```bash
+python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+```
+Так как Windows PowerShell по умолчанию настроен на политику безопасности Restricted, которая запрещает выполнение любых .ps1-файлов (скриптов)
 ### 3. Установка зависимостей
 ```bash
 pip install -r requirements.txt
